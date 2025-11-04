@@ -104,17 +104,23 @@ if exist('filename','var') % by file
         error(ErrorText);
     end
     
-    conf = SavedData.conf;
+    if isfield(SavedData,'conf')
+        conf = SavedData.conf;
+    elseif isfield(SavedData,'settings')
+        conf = SavedData.settings.conf;
+    else
+        error('conf structure is not stored in file');
+    end
 else
     % get everything from workspace
     % conf
-    if evalin('base','exist(''conf'',''var'')');
+    if evalin('base','exist(''conf'',''var'')')
         conf = evalin('base','conf');
     else
         error('Could not find conf in workspace');
     end
     % current experiment
-    if evalin('base','exist(''currexp'',''var'')');
+    if evalin('base','exist(''currexp'',''var'')')
         estr = evalin('base','currexp');
     else
         error('Could not find currexp in workspace');
@@ -350,7 +356,12 @@ EchoMaxRange = (EchoPosition-Distance2Position+1:EchoPosition+Distance2Position)
 
 % get the downconversion LO
 FullTimeAxis = (0:(length(EchoMaxRange)-1)).'/fsmp;
-LO = exp(-2*pi*1i*FullTimeAxis*DetectionFrequency.');
+% check if data was recorded with undersampling or oversampling
+if DetectionFrequency > fsmp/2
+    LO = exp(-2*pi*1i*FullTimeAxis*DetectionFrequency.');
+else
+    LO = exp(-2*pi*1i*FullTimeAxis*(fsmp-DetectionFrequency).');           % complex signal to downconvert echo
+end
 
 flipback = 0;
 % 1D or 2D?
@@ -606,6 +617,18 @@ elseif isfield(savedta,'dta_001')
             else
                 nAvgs = ii;
             end
+        end
+    end
+elseif any(contains(fieldnames(savedta), 'dta_'))
+    fields = fieldnames(savedta);  % Get all field names
+    dta_fields = fields(contains(fields, 'dta_'));
+    for ii = 1:length(dta_fields)
+        dta{ii} = double(eval(['savedta.' dta_fields{ii}]));
+        % only keep it if the average is complete, unless it is the first
+        if sum(dta{ii}(end-estr.events{estr.det_event}.det_len:end)) == 0 && ii > 1
+            dta = dta(1:end-1);
+        else
+            nAvgs = ii;
         end
     end
 else

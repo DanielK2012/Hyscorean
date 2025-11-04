@@ -498,8 +498,17 @@ switch FileExtension
             
             TimeAxis1 = TimeAxis1ordered;
             % Get the time axis for plotting the original echos before downconversion
-            exp = load(FileNames{1},'conf');
-            fsmp = exp.conf.std.dig_rate;
+            exp_settings = load(FileNames{1},'settings');
+            if isfield(exp_settings, 'settings')
+                fsmp = exp_settings.settings.conf.std.dig_rate;
+            else
+                exp_settings = load(FileNames{1},'conf');
+                if isfield(exp_settings, 'conf')
+                    fsmp = exp_settings.conf.std.dig_rate;
+                else
+                    error('conf structure is not stored in file');
+                end
+            end
             dtatimeaxis = linspace(0,size(dta{1},1)-1,size(dta{1},1))./fsmp; 
         end
         
