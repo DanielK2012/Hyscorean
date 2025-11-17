@@ -29,12 +29,7 @@ else
 end
 
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(figureHandle,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(Figure);
 
 %Position new figure relative to fitting module
 hFig = findobj('Tag','esfitFigure_hyscorean');

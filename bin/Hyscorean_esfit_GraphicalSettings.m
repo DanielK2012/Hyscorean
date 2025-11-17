@@ -46,13 +46,7 @@ set(hObject,'Position',varargin{3});
 set(hObject,'Name','Settings');
 
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(hObject,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
-
+setFigureIcon(hObject);
 
 Settings = varargin{1};
 %Get current settings from the function input and set the UI elements

@@ -520,12 +520,7 @@ if FitData.GUI
         clf(hFig);
     end
     
-    warning('off','all')
-    Path =  fileparts(which('Hyscorean'));
-    jFrame=get(hFig,'javaframe');
-    jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-    jFrame.setFigureIcon(jicon);
-    warning('on','all')
+    setFigureIcon(hFig);
     
     
     %Set main window properties
@@ -2997,12 +2992,7 @@ else
 end
 
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(FitData.DetachedRMSD_Fig,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(FitData.DetachedRMSD_Fig);
 
 %Set figure properties
 set(FitData.DetachedRMSD_Fig,'WindowStyle','normal','DockControls','off','MenuBar','none');
@@ -3068,12 +3058,7 @@ if ~isempty(FitData.ParameterEvol)
     end
     
     %Use Hyscorean window logo
-    warning('off','all')
-    Path =  fileparts(which('Hyscorean'));
-    jFrame=get(FitData.detachedParamEvol_Fig,'javaframe');
-    jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-    jFrame.setFigureIcon(jicon);
-    warning('on','all')
+    setFigureIcon(FitData.detachedParamEvol_Fig);
     
     sz = [650 2*200]; % figure size
     screensize = get(0,'ScreenSize');
@@ -3313,12 +3298,7 @@ for i=1:length(hFig.Children)
 end
 
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(hFig,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(hFig);
 
 %Remove the figure number and give it a title
 set(hFig,'NumberTitle','off','Name','Hyscorean: HYSCORE Fit');
