@@ -67,14 +67,8 @@ end
 
 %==========================================================================
 function Hyscorean_OpeningFcn(hObject, eventdata, handles, varargin)
+setFigureIcon(hObject);
 handles.output = hObject;
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(hObject,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-handles.output = hObject;
-warning('on','all')
 guidata(hObject, handles);
 %==========================================================================
 
@@ -606,12 +600,7 @@ set(AxesHandles,'Position',[0.07 0.12 0.9 0.85]);
 colormap(AxesHandles,GraphicalSettings.ColormapName)
 
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(Figure,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(Figure);
 
 %If the blindspots are being superimposed then switch to the hot colormap
 if get(handles.ImposeBlindSpots,'value')
@@ -632,12 +621,7 @@ else
   clf(Figure);
 end
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(Figure,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(Figure);
 
 %Make the window appear relative to the Hyscorean window
 ScreenSize = get(0,'ScreenSize');
@@ -674,12 +658,7 @@ else
   clf(Figure);
 end
 %Use Hyscorean window logo
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(Figure,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-warning('on','all')
+setFigureIcon(Figure);
 %Make the window appear relative to the Hyscorean window
 Position = handles.HyscoreanFigure.Position;
 Position(1) = Position(1)+500;

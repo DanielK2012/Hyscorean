@@ -37,13 +37,7 @@ end
 function Hyscorean_saveSettings_OpeningFcn(hObject, eventdata, handles, varargin)
 
 handles.output = hObject;
-warning('off','all')
-Path =  fileparts(which('Hyscorean'));
-jFrame=get(hObject,'javaframe');
-jicon=javax.swing.ImageIcon(fullfile(Path, 'bin', 'logo.png'));
-jFrame.setFigureIcon(jicon);
-handles.output = hObject;
-warning('on','all')
+setFigureIcon(hObject);
 guidata(hObject, handles);
 
 % Choose default command line output 
