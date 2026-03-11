@@ -1,4 +1,4 @@
-function Answer=inputdlg(Prompt, Title, NumLines, DefAns, Resize)
+function Answer=inputdlg_mod(Prompt, Title, NumLines, DefAns, Resize)
 %INPUTDLG Input dialog box.
 %  ANSWER = INPUTDLG(PROMPT) creates a modal dialog box that returns user
 %  input for multiple prompts in the cell array ANSWER. PROMPT is a cell
@@ -66,7 +66,7 @@ end
 NumQuest=numel(Prompt);
 
 
-if nargin<2,
+if nargin<2
   Title=' ';
 end
 
@@ -108,7 +108,7 @@ elseif (rw ~= NumQuest | cl > 2) %#ok
   error(message('MATLAB:inputdlg:IncorrectSize'))
 end
 
-if ~iscell(DefAns),
+if ~iscell(DefAns)
   error(message('MATLAB:inputdlg:InvalidDefaultAnswer'));
 end
 
@@ -341,18 +341,18 @@ end
 if ishghandle(InputFig)
   % Go into uiwait if the figure handle is still valid.
   % This is mostly the case during regular use.
-  c = matlab.ui.internal.dialog.DialogUtils.disableAllWindowsSafely();
+  % c = matlab.ui.internal.dialog.DialogUtils.disableAllWindowsSafely();
   uiwait(InputFig);
-  delete(c);
+  % delete(c);
 end
 
 % Check handle validity again since we may be out of uiwait because the
 % figure was deleted.
 if ishghandle(InputFig)
   Answer={};
-  if strcmp(get(InputFig,'UserData'),'OK'),
+  if strcmp(get(InputFig,'UserData'),'OK')
     Answer=cell(NumQuest,1);
-    for lp=1:NumQuest,
+    for lp=1:NumQuest
       Answer(lp)=get(EditHandle(lp),{'String'});
     end
   end

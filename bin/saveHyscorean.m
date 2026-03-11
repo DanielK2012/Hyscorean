@@ -1,15 +1,14 @@
-
-function saveHyscorean(handles)
+function saveHyscorean(app)
 %==========================================================================
 % Hyscorean Save&Report Protocol
 %==========================================================================
 % This function is responsible for the generation and execution of the
 % saving functionality of the main Hyscorean GUI. The function takes care
 % of the following saves:
-%     -> A .m file with the current processing settings
-%     -> A .m file with the raw and processed signal and spectra
+%     -> A .mat file with the current processing settings
+%     -> A .mat file with the raw and processed signal and spectra
 %     -> A copy of the main display window in .fig and .pdf format
-%     -> A .m file with the data necessary to launch the fitting module
+%     -> A .mat file with the data necessary to launch the fitting module
 %     -> A automatically generated processing report with all information
 %
 % NOTE: If the export_fig package is installed on MATLAB the exported PDF
@@ -19,6 +18,7 @@ function saveHyscorean(handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -26,12 +26,12 @@ function saveHyscorean(handles)
 %==========================================================================
 
 %Inform user that saving process has started
-set(handles.ProcessingInfo, 'String', 'Status: Saving session'); drawnow;
+app.ProcessingInfo.Text = 'Status: Saving session'; drawnow;
 
 %Initiallize some variables
 CrashFlag = false;
-SaveHyscoreanSettings = handles.SaveHyscoreanSettings;
-GraphicalSettings = handles.GraphicalSettings;
+SaveHyscoreanSettings = app.SaveHyscoreanSettings;
+GraphicalSettings = app.GraphicalSettings;
 
 %==========================================================================
 % Prepare saving directory and path
@@ -57,7 +57,7 @@ end
 %==========================================================================
 
 %Get current processing settings from the GUI
-Settings = getSettings(handles);
+Settings = getSettings(app);
 %Send settings structure to base workspace for save to work
 assignin('base', 'Settings', Settings);
 %Format savename until it is different from the rest in the folder
@@ -78,21 +78,21 @@ save(fullfile(FullPath,SaveName),'Settings');
 %Now remove the variable from the base workspace
 evalin( 'base', 'clear Settings' )
 %Inform the user of succesful step
-set(handles.ProcessingInfo, 'String', 'Status: Saving session 20%'); drawnow;
+app.ProcessingInfo.Text = 'Status: Saving session 20%'; drawnow;
 
 %==========================================================================
 % Save data
 %==========================================================================
 
 %Get spectrum and frequency axis
-Spectrum = handles.Processed.spectrum;
-FrequencyAxis1 = handles.Processed.axis1;
-FrequencyAxis2 = handles.Processed.axis2;
+Spectrum = app.Processed.spectrum;
+FrequencyAxis1 = app.Processed.axis1;
+FrequencyAxis2 = app.Processed.axis2;
 %Get raw and processed signal and time axes
-ProcessedSignal = handles.Processed.Signal;
-RawSignal = handles.Data.Integral;
-TimeAxis1 = handles.Processed.TimeAxis1;
-TimeAxis2 = handles.Processed.TimeAxis2;
+ProcessedSignal = app.Processed.Signal;
+RawSignal = app.Data.Integral;
+TimeAxis1 = app.Processed.TimeAxis1;
+TimeAxis2 = app.Processed.TimeAxis2;
 %Use the same formatting in name as before to avoid filename clash
 SaveName = sprintf('%s_%s_OutputData.mat',Date,Identifier);
 if CrashFlag
@@ -101,7 +101,7 @@ end
 %Save data to file
 save(fullfile(FullPath,SaveName),'Spectrum','ProcessedSignal','RawSignal','TimeAxis1','TimeAxis1','TimeAxis2','FrequencyAxis1','FrequencyAxis2');
 %Inform user of succesful completed step
-set(handles.ProcessingInfo, 'String', 'Status: Saving session 40%'); drawnow;
+app.ProcessingInfo.Text = 'Status: Saving session 40%'; drawnow;
 
 %==========================================================================
 % Save main figure
@@ -110,16 +110,16 @@ set(handles.ProcessingInfo, 'String', 'Status: Saving session 40%'); drawnow;
 %Open a ghost figure, invisible to the user
 GhostFigure = figure('Visible','off','Units','pixels','Position',[100 100 776 415]);
 %Copy the main display exactly as it is...
-AxesHandles = copyobj(handles.mainPlot,GhostFigure);
+Axesapp = copyobj(app.mainPlot,GhostFigure);
 %... and just format a bit the size and its relative position in the new figure
-set(AxesHandles,'Position',[0.07 0.12 0.9 0.85]);
+set(Axesapp,'Position',[0.07 0.12 0.9 0.85]);
 %Use the same formatting in name as before to avoid filename clash
 SaveName = sprintf('%s_%s_spectrum',Date,Identifier);
 if CrashFlag
     SaveName = sprintf('%s_%s_spectrum_%i',Date,Identifier,CopyIndex);
 end
 
-%Get the handles to the contour plot
+%Get the app to the contour plot
 ContourHandle = findobj(GhostFigure,'Type','contour');
 %Create a new ghost figure to hold the false contour plot
 GhostFigure2 = figure('Visible','off','Position',[100 100 776 415]); % Invisible figure
@@ -129,7 +129,7 @@ contour2lineplot_hyscorean(ContourHandle,1,GraphicalSettings.ColormapName,Graphi
 %Delete the ghost figure containing the heavy contour plot
 delete(GhostFigure);
 %Format the new axis of the remaining ghost figure to be as before
-Limits = str2double(get(handles.XUpperLimit,'string'));
+Limits = str2double(app.XUpperLimit.Value);
 xlim([-Limits Limits])
 ylim([0 Limits])
 xlabel('\nu_1 [MHz]')
@@ -137,8 +137,8 @@ ylabel('\nu_2 [MHz]')
 grid on
 hold on
 box on
-plot(handles.Processed.axis1,abs(handles.Processed.axis1),'k-.')
-plot(zeros(length(handles.Processed.axis1)),handles.Processed.axis1,'k')
+plot(app.Processed.axis1,abs(app.Processed.axis1),'k-.')
+plot(zeros(length(app.Processed.axis1)),app.Processed.axis1,'k')
 currentXTicks = xticks(GhostFigure2.Children);
 yticks(GhostFigure2.Children,currentXTicks(currentXTicks>=0))
 set(GhostFigure2.Children,'yticklabel',currentXTicks(currentXTicks>=0),'xticklabel',currentXTicks)
@@ -146,7 +146,7 @@ set(GhostFigure2.Children,'yticklabel',currentXTicks(currentXTicks>=0),'xticklab
 %Define a create function for ghost figure, so that when it is later opened by user, it dislplays normally
 set(GhostFigure2,'CreateFcn','set(gcbf,''Visible'',''on'')');
 %Save as Matlab figure (.fig)
-savefig(GhostFigure2,fullfile(FullPath,[SaveName '.fig']), 'compact');
+savefig(GhostFigure2,fullfile(FullPath,[SaveName '.fig']));
 %Save as high-definition or normal PDF figure (.pdf)
 if exist('export_fig','file')
     export_fig(fullfile(FullPath,SaveName),'-pdf','-transparent',GhostFigure2)
@@ -157,7 +157,7 @@ end
 delete(GhostFigure2);
 
 %Inform user of succesfull step
-set(handles.ProcessingInfo, 'String', 'Status: Saving session 60%'); drawnow;
+app.ProcessingInfo.Text = 'Status: Saving session 60%'; drawnow;
 
 %==========================================================================
 % Create report
@@ -168,29 +168,29 @@ if getpref('hyscorean','reportlicense')
     
     %Get generic parameters or variables needed for report
     reportdata = Settings;
-    reportdata.Processed = handles.Processed;
+    reportdata.Processed = app.Processed;
     reportdata.GraphicalSettings = GraphicalSettings;
-    reportdata.Data = handles.Data;
-    reportdata.TauValues = handles.Data.TauValues;
-    reportdata.TimeStep1 = handles.Data.TimeStep1;
-    reportdata.TimeStep2 = handles.Data.TimeStep2;
-    Offset = get(handles.FieldOffset,'string');
+    reportdata.Data = app.Data;
+    reportdata.TauValues = app.Data.TauValues;
+    reportdata.TimeStep1 = app.Data.TimeStep1;
+    reportdata.TimeStep2 = app.Data.TimeStep2;
+    Offset = app.FieldOffset.Value;
     reportdata.FieldOffset = str2double(Offset);
-    reportdata.currentTaus = handles.currentTaus;
-    reportdata.L2GActive = get(handles.Lorentz2GaussCheck,'Value');
-    reportdata.mainPlotHandle = handles.mainPlot;
+    reportdata.currentTaus = app.currentTaus;
+    reportdata.L2GActive = app.Lorentz2GaussCheck.Value;
+    reportdata.mainPlotHandle = app.mainPlot;
     BackgroundAxis = linspace(min(reportdata.Data.CorrectedTimeAxis1),max(reportdata.Data.CorrectedTimeAxis1),length(reportdata.Data.Background1));
     reportdata.BackgroundStart1 = round(1000*BackgroundAxis(reportdata.Data.BackgroundStartIndex1),0);
     reportdata.BackgroundStart2 = round(1000*BackgroundAxis(reportdata.Data.BackgroundStartIndex2),0);
-    reportdata.MinimalContourLevel = str2double(get(handles.MinimalContourLevel,'string'));
-    reportdata.MaximalContourLevel = str2double(get(handles.MaximalContourLevel,'string'));
+    reportdata.MinimalContourLevel = str2double(app.MinimalContourLevel.Value);
+    reportdata.MaximalContourLevel = str2double(app.MaximalContourLevel.Value);
     %Store apodization window
-    WindowDecay1 = str2double(get(handles.WindowLength1,'string'));
-    WindowDecay2 = str2double(get(handles.WindowLength2,'string'));
-    WindowType = handles.WindowTypeString;
-    [~,Window1,Window2] = apodizationWin(handles.Processed.Signal,WindowType,WindowDecay1,WindowDecay2);
-    TimeAxis1 = handles.Processed.TimeAxis1(1:length(handles.Processed.TimeAxis1)-str2double(get(handles.ZeroFilling1,'String')));
-    TimeAxis2 = handles.Processed.TimeAxis2(1:length(handles.Processed.TimeAxis2)-str2double(get(handles.ZeroFilling2,'String')));
+    WindowDecay1 = str2double(app.WindowLength1.Value);
+    WindowDecay2 = str2double(app.WindowLength2.Value);
+    WindowType = app.WindowTypeString;
+    [~,Window1,Window2] = apodizationWin(app.Processed.Signal,WindowType,WindowDecay1,WindowDecay2);
+    TimeAxis1 = app.Processed.TimeAxis1(1:length(app.Processed.TimeAxis1)-str2double(app.ZeroFilling1.Value));
+    TimeAxis2 = app.Processed.TimeAxis2(1:length(app.Processed.TimeAxis2)-str2double(app.ZeroFilling2.Value));
     Window2 = Window2/max(Window2);
     Window1 = Window1/max(Window1);
 %     Window1 = Window1';
@@ -205,18 +205,17 @@ if getpref('hyscorean','reportlicense')
     else
         Window2=[Window2 zeros(1,length(TimeAxis2)-WindowDecay2)];
     end
-    WindowStrings = get(handles.WindowType,'string');
-    reportdata.WindowType = WindowStrings{get(handles.WindowType,'value')};
+    reportdata.WindowType = app.WindowTypeString;
     reportdata.ApodizationWindow1 = Window1;
     reportdata.ApodizationWindow2 = Window2;
     reportdata.WindowLength1 = WindowDecay1;
     reportdata.WindowLength2 = WindowDecay2;
-    strings = get(handles.Symmetrization_ListBox,'string');
-    reportdata.Symmetrization = strings(get(handles.Symmetrization_ListBox,'Value'));
+    % strings = app.Symmetrization_ListBox.Value;
+    reportdata.Symmetrization = app.Symmetrization_ListBox.Value;
     
     %Get BRUKER spectrometer-specific parameters and variables
-    if isfield(handles.Data,'BrukerParameters')
-        BrukerParameters = handles.Data.BrukerParameters;
+    if isfield(app.Data,'BrukerParameters') && ~isempty(app.Data.BrukerParameters)
+        BrukerParameters = app.Data.BrukerParameters;
         [Param] = brukerparam(BrukerParameters);
         reportdata.CenterField = Param.Centerfield;
         reportdata.MW_Frequency = Param.mwFreq;
@@ -230,28 +229,28 @@ if getpref('hyscorean','reportlicense')
     
  
 	
-    if handles.Data.NUSflag
-        reportdata.XDimension = handles.Data.NUS.Dimension1;
-        reportdata.YDimension = handles.Data.NUS.Dimension2;
-        reportdata.NUSflag = true;
-    else
-        reportdata.XDimension = BrukerParameters.XPTS;
-        reportdata.YDimension = BrukerParameters.YPTS;
-        reportdata.NUSflag = false;
-    end
+        if app.Data.NUSflag
+            reportdata.XDimension = app.Data.NUS.Dimension1;
+            reportdata.YDimension = app.Data.NUS.Dimension2;
+            reportdata.NUSflag = true;
+        else
+            reportdata.XDimension = BrukerParameters.XPTS;
+            reportdata.YDimension = BrukerParameters.YPTS;
+            reportdata.NUSflag = false;
+        end
 	
 	end									   
     
 
 %Get AWG spectrometer-specific parameters and variables
-if isfield(handles.Data,'AWG_Parameters')
-    AWG_Parameters = handles.Data.AWG_Parameters;
+if isfield(app.Data,'AWG_Parameters') && ~isempty(app.Data.AWG_Parameters)
+    AWG_Parameters = app.Data.AWG_Parameters;
     if ~isfield(AWG_Parameters,'NUS_flag')
         AWG_Parameters.NUS_flag = false;
     end
     reportdata.NUSflag  = AWG_Parameters.NUS_flag;
     reportdata.Pulse90Length  = AWG_Parameters.events{1}.pulsedef.tp;
-    if handles.Data.exptype == '6pHYSCORE'
+    if app.Data.exptype == '6pHYSCORE'
         reportdata.Pulse180Length  = AWG_Parameters.events{4}.pulsedef.tp;
     else
         reportdata.Pulse180Length  = AWG_Parameters.events{3}.pulsedef.tp;
@@ -275,30 +274,31 @@ end
 
 %Get NUS-specific parameters and variables
 if reportdata.NUSflag
-    switch get(handles.ReconstructionAlgorithm,'Value')
-        case 1 %Constant-lambda CAMERA Reconstruction
-            reportdata.ReconstructionMethod = 'Constant-aim CAMERA';
-        case 2 %CAMERA
-            reportdata.ReconstructionMethod = 'CAMERA';
-        case 3 %FFM-CG
-            reportdata.ReconstructionMethod = 'FFM-CG';
-        case 4 %FFM-GD
-            reportdata.ReconstructionMethod = 'FFM-GD';
-        case 5 %IST-S Reconstruction
-            reportdata.ReconstructionMethod = 'IST-S';
-        case 6 %IST-D Reconstruction
-            reportdata.ReconstructionMethod = 'IST-D';
-    end
-    reportdata.BackgroundParameter = str2double(get(handles.MaxEntBackgroundParameter,'string'));
-    reportdata.LagrangeMultiplier = str2double(get(handles.MaxEntLagrangianMultiplier,'string'));
-    reportdata.ReconstructionFunctional = handles.Data.ReconstructionConvergence;
+    reportdata.ReconstructionMethod = app.ReconstructionAlgorithm.Value;
+    % switch app.ReconstructionAlgorithm.Value
+    %     case 1 %Constant-lambda CAMERA Reconstruction
+    %         reportdata.ReconstructionMethod = 'Constant-aim CAMERA';
+    %     case 2 %CAMERA
+    %         reportdata.ReconstructionMethod = 'CAMERA';
+    %     case 3 %FFM-CG
+    %         reportdata.ReconstructionMethod = 'FFM-CG';
+    %     case 4 %FFM-GD
+    %         reportdata.ReconstructionMethod = 'FFM-GD';
+    %     case 5 %IST-S Reconstruction
+    %         reportdata.ReconstructionMethod = 'IST-S';
+    %     case 6 %IST-D Reconstruction
+    %         reportdata.ReconstructionMethod = 'IST-D';
+    % end
+    reportdata.BackgroundParameter = str2double(app.MaxEntBackgroundParameter.Value);
+    reportdata.LagrangeMultiplier = str2double(app.MaxEntLagrangianMultiplier.Value);
+    reportdata.ReconstructionFunctional = app.Data.ReconstructionConvergence;
     SampledPoints = length(find(reportdata.Data.NUSgrid==1));
     FullSampling = reportdata.XDimension*reportdata.YDimension;
     reportdata.SamplingDensity = sprintf('%.2f%%',round(100*SampledPoints/FullSampling,2));
 end
 
 %Round some values to look nicer
-reportdata.MW_Frequency = round(reportdata.MW_Frequency,2);
+reportdata.MW_Frequency = round(reportdata.MW_Frequency,4);
 reportdata.MinimalContourLevel = round(reportdata.MinimalContourLevel,2);
 
 %Use the same formatting in name as before to avoid filename clash
@@ -310,12 +310,12 @@ reportdata.filename = ReportName;
 reportdata.path = FullPath;
 
 %Add name and path of the original experimental data file(s)
-if  isfield(handles.Data,'AWG_Parameters')
-    reportdata.OriginalFileName = sprintf('%i files',length(handles.FilePaths.Files));
+if  isfield(app.Data,'AWG_Parameters')
+    reportdata.OriginalFileName = sprintf('%i files',length(app.FilePaths.Files));
 else
-    reportdata.OriginalFileName = handles.FilePaths.Files;
+    reportdata.OriginalFileName = app.FilePaths.Files;
 end
-reportdata.OriginalFilePath = handles.FilePaths.Path;
+reportdata.OriginalFilePath = app.FilePaths.Path;
 
 %Get the location of the processing report logo
 HyscoreanPath = which('Hyscorean');
@@ -334,7 +334,7 @@ else
 end
 
 %Inform user of succesful completed step
-set(handles.ProcessingInfo, 'String', 'Status: Saving session 80%'); drawnow;
+app.ProcessingInfo.Text = 'Status: Saving session 80%'; drawnow;
 
 %==========================================================================
 % Save data for Easyspin fitting
@@ -342,40 +342,40 @@ set(handles.ProcessingInfo, 'String', 'Status: Saving session 80%'); drawnow;
 
 try
     %Collect necessary data for the fitting module
-    DataForFitting.Exptype = handles.Data.exptype;
-    DataForFitting.Spectrum = handles.Processed.spectrum;
-    DataForFitting.TauValues = handles.Data.TauValues/1000;
-    DataForFitting.TimeStep1 = handles.Data.TimeStep1;
-    DataForFitting.TimeStep2 = handles.Data.TimeStep2;
-    DataForFitting.FieldOffset = 0.1*str2double(get(handles.FieldOffset,'string')); %mT
-    DataForFitting.currentTaus = handles.currentTaus;
-    DataForFitting.Lorentz2GaussCheck = get(handles.Lorentz2GaussCheck,'Value');
-    DataForFitting.BackgroundStart1 = round(1000*BackgroundAxis(handles.Data.BackgroundStartIndex1),0);
-    DataForFitting.BackgroundStart2 = round(1000*BackgroundAxis(handles.Data.BackgroundStartIndex2),0);
-    if isfield(handles.Data,'BrukerParameters')
-        BrukerParameters = handles.Data.BrukerParameters;
+    DataForFitting.Exptype = app.Data.exptype;
+    DataForFitting.Spectrum = app.Processed.spectrum;
+    DataForFitting.TauValues = app.Data.TauValues/1000;
+    DataForFitting.TimeStep1 = app.Data.TimeStep1;
+    DataForFitting.TimeStep2 = app.Data.TimeStep2;
+    DataForFitting.FieldOffset = 0.1*str2double(app.FieldOffset.Value); %mT
+    DataForFitting.currentTaus = app.currentTaus;
+    DataForFitting.Lorentz2GaussCheck = app.Lorentz2GaussCheck.Value;
+    DataForFitting.BackgroundStart1 = round(1000*BackgroundAxis(app.Data.BackgroundStartIndex1),0);
+    DataForFitting.BackgroundStart2 = round(1000*BackgroundAxis(app.Data.BackgroundStartIndex2),0);
+    if isfield(app.Data,'BrukerParameters')
+        BrukerParameters = app.Data.BrukerParameters;
         [Param] = brukerparam(BrukerParameters);
         DataForFitting.Field = Param.Centerfield;
         DataForFitting.mwFreq = Param.mwFreq;
         FirstPulseLength = Param.Pulse90;
-    elseif isfield(handles.Data,'AWG_Parameters')
-        DataForFitting.Field =  0.1*handles.Data.AWG_Parameters.B;%mT
-        DataForFitting.mwFreq = handles.Data.AWG_Parameters.LO + handles.Data.AWG_Parameters.nu_obs;
-        FirstPulseLength = handles.Data.AWG_Parameters.events{1}.pulsedef.tp/1000;
+    elseif isfield(app.Data,'AWG_Parameters')
+        DataForFitting.Field =  0.1*app.Data.AWG_Parameters.B;%mT
+        DataForFitting.mwFreq = app.Data.AWG_Parameters.LO + app.Data.AWG_Parameters.nu_obs;
+        FirstPulseLength = app.Data.AWG_Parameters.events{1}.pulsedef.tp/1000;
     end
     DataForFitting.ExciteWidth = 1/FirstPulseLength;
-    DataForFitting.nPoints = length(handles.Data.PreProcessedSignal);
-    DataForFitting.ZeroFillFactor = length(handles.Processed.Signal)/length(handles.Data.PreProcessedSignal);
-    DataForFitting.FreqLim = str2double(get(handles.XUpperLimit,'string'));
-    DataForFitting.WindowType = handles.WindowTypeString;
-    DataForFitting.WindowLength1 = str2double(get(handles.WindowLength1,'string'));
-    DataForFitting.WindowLength2 = str2double(get(handles.WindowLength2,'string'));
-    DataForFitting.L2GParameters.tauFactor2 = str2double(get(handles.L2G_tau2,'string'));
-    DataForFitting.L2GParameters.sigmaFactor2 = str2double(get(handles.L2G_sigma2,'string'));
-    DataForFitting.L2GParameters.tauFactor1 = str2double(get(handles.L2G_tau,'string'));
-    DataForFitting.L2GParameters.sigmaFactor1 = str2double(get(handles.L2G_sigma,'string'));
-    DataForFitting.Symmetrization = handles.SymmetrizationString;
-    DataForFitting.Exptype = handles.Data.exptype;
+    DataForFitting.nPoints = length(app.Data.PreProcessedSignal);
+    DataForFitting.ZeroFillFactor = length(app.Processed.Signal)/length(app.Data.PreProcessedSignal);
+    DataForFitting.FreqLim = str2double(app.XUpperLimit.Value);
+    DataForFitting.WindowType = app.WindowTypeString;
+    DataForFitting.WindowLength1 = str2double(app.WindowLength1.Value);
+    DataForFitting.WindowLength2 = str2double(app.WindowLength2.Value);
+    DataForFitting.L2GParameters.tauFactor2 = str2double(app.L2G_tau2.Value);
+    DataForFitting.L2GParameters.sigmaFactor2 = str2double(app.L2G_sigma2.Value);
+    DataForFitting.L2GParameters.tauFactor1 = str2double(app.L2G_tau.Value);
+    DataForFitting.L2GParameters.sigmaFactor1 = str2double(app.L2G_sigma.Value);
+    DataForFitting.Symmetrization = app.SymmetrizationString;
+    DataForFitting.Exptype = app.Data.exptype;
     
     %Send settings structure to base workspace
     assignin('base', 'DataForFitting', DataForFitting);
@@ -396,6 +396,6 @@ catch
 end
 
 %Inform user that saving is finished
-set(handles.ProcessingInfo, 'String', 'Status: Session saved'); drawnow;
+app.ProcessingInfo.Text = 'Status: Session saved'; drawnow;
 
 return

@@ -1,4 +1,4 @@
-function MountedData = mountHYSCOREdata(FileNames,handles)
+function MountedData = mountHYSCOREdata(FileNames,app)
 %==========================================================================
 % Hyscorean Mounter
 %==========================================================================
@@ -9,6 +9,7 @@ function MountedData = mountHYSCOREdata(FileNames,handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2018-2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -18,7 +19,7 @@ function MountedData = mountHYSCOREdata(FileNames,handles)
 %Check extension of file to know how to mount data
 [~,~,FileExtension] = fileparts(FileNames{1});
 
-set(handles.ProcessingInfo, 'String', 'Status: Preparing data...'); drawnow;
+app.ProcessingInfo.Text = 'Status: Preparing data...'; drawnow;
 warning('off','all')
 
 switch FileExtension
@@ -237,7 +238,7 @@ switch FileExtension
     case '.mat'
         
         %Initiate the status bar in the Hyscorean gui
-        set(handles.ProcessingInfo, 'String','Status: Checking data...'); drawnow;
+        app.ProcessingInfo.Text = 'Status: Checking data...'; drawnow;
       
         
         NFiles = length(str2double(FileNames));
@@ -420,7 +421,7 @@ switch FileExtension
 
         % Evaluation with uwb_eval and filtering of each trace, storing data in correct order in arrays for mountHYSCOREdata gui
         for iFile = 1:NFiles
-            set(handles.ProcessingInfo, 'String', sprintf('Status: Mounting file %i/%i',iFile,NFiles)); drawnow;
+            app.ProcessingInfo.Text = sprintf('Status: Mounting file %i/%i',iFile,NFiles); drawnow;
             OutputUWB = uwb_eval(FileNamessorted{iFile},options);             % Evaluate file with uwb_eval
             AWG_Parameters = OutputUWB.exp;                             % Store general experiment parameters
 			AWG_Parameters.nu_obs = OutputUWB.det_frq;								 
@@ -473,7 +474,7 @@ switch FileExtension
         DataForIntegration.EchoAxis = EchoAxis;
         DataForIntegration.isNotIntegrated  = true;
         DataForIntegration.Dimension2 = Dimension2;
-        options.status = handles.ProcessingInfo;
+        options.status = app.ProcessingInfo.Text;
         [IntegratedData] = integrateEcho(DataForIntegration,'gaussian',options);
         if ~isstruct(IntegratedData) && isnan(IntegratedData)
             h = warndlg({'Default gaussian echo integration failed.',...

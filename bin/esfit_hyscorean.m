@@ -17,6 +17,7 @@ function varargout = esfit_hyscorean(SimFunctionName,ExpSpec,Sys0,Vary,Exp,SimOp
 % Adapted from esfit(EasySpin) by Stoll et al.
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -71,7 +72,7 @@ end
 
 %Get the path to Hyscorean source code
 Path2Hyscorean = which('Hyscorean');
-Path2Hyscorean = Path2Hyscorean(1:end-11);
+Path2Hyscorean = Path2Hyscorean(1:end-15);
 
 %Close all parpools
 delete(gcp('nocreate'))
@@ -1868,9 +1869,9 @@ if FitData.GUI%&& ((UserCommand~=99) )
             end
             active = data{p,1};
             if active
-                data{p,4} = ['<html><font color="#000000">' newdata(1:idx-1) '</font><font color="#ff0000">' newdata(idx:end) '</font></html>'];
+                data{p,4} = [newdata(1:idx-1) newdata(idx:end)];
             else
-                data{p,4} = ['<html><font color="#888888">' newdata '</font></html>'];
+                data{p,4} = newdata;
             end
         end
         
@@ -1892,9 +1893,9 @@ if FitData.GUI%&& ((UserCommand~=99) )
                 end
                 active = data{p,1};
                 if active
-                    data{p,3} = ['<html><font color="#000000">' newdata(1:idx-1) '</font><font color="#009900">' newdata(idx:end) '</font></html>'];
+                    data{p,3} = [newdata(1:idx-1)  newdata(idx:end)];
                 else
-                    data{p,3} = ['<html><font color="#888888">' newdata '</font></html>'];
+                    data{p,3} = newdata;
                 end
             end
         end

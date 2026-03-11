@@ -1,4 +1,4 @@
-function Settings = getSettings(handles)
+function Settings = getSettings(app)
 %==========================================================================
 % Hyscorean Retrieve Settings 
 %==========================================================================
@@ -7,6 +7,7 @@ function Settings = getSettings(handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -14,33 +15,33 @@ function Settings = getSettings(handles)
 %==========================================================================
 
  % Retrieve and store current GUI settings 
-  Settings.tauFactor1 = str2double(get(handles.L2G_tau,'string'));
-  Settings.sigmaFactor1 = str2double(get(handles.L2G_sigma,'string'));
-  Settings.zerofilling1 = str2double(get(handles.ZeroFilling1,'string'));
-  Settings.tauFactor2 = str2double(get(handles.L2G_tau2,'string'));
-  Settings.sigmaFactor2 = str2double(get(handles.L2G_sigma2,'string'));
-  Settings.Lorentz2GaussCheck = get(handles.Lorentz2GaussCheck,'value');
-  Settings.zerofilling1 = str2double(get(handles.ZeroFilling1,'string'));
-  Settings.zerofilling2 = str2double(get(handles.ZeroFilling2,'string'));
-  Settings.WindowDecay1 = str2double(get(handles.WindowLength1,'string'));
-  Settings.WindowDecay2 = str2double(get(handles.WindowLength1,'string'));
-  Settings.WindowType = get(handles.WindowType,'value');
-  Settings.BackgroundMethod2 = get(handles.BackgroundMethod2,'Value');
-  Settings.BackgroundMethod1 = get(handles.BackgroundMethod1,'Value');
-  Settings.BackgroundParameter1 = str2double(get(handles.BackgroundParameter1,'string'));
-  Settings.BackgroundParameter2 = str2double(get(handles.BackgroundParameter2,'string'));
+  Settings.tauFactor1 = str2double(app.L2G_tau.Value);
+  Settings.sigmaFactor1 = str2double(app.L2G_sigma.Value);
+  Settings.zerofilling1 = str2double(app.ZeroFilling1.Value);
+  Settings.tauFactor2 = str2double(app.L2G_tau2.Value);
+  Settings.sigmaFactor2 = str2double(app.L2G_sigma2.Value);
+  Settings.Lorentz2GaussCheck = app.Lorentz2GaussCheck.Value;
+  Settings.zerofilling1 = str2double(app.ZeroFilling1.Value);
+  Settings.zerofilling2 = str2double(app.ZeroFilling2.Value);
+  Settings.WindowDecay1 = str2double(app.WindowLength1.Value);
+  Settings.WindowDecay2 = str2double(app.WindowLength1.Value);
+  Settings.WindowType = app.WindowType.Value;
+  Settings.BackgroundMethod2 = app.BackgroundMethod2.Value;
+  Settings.BackgroundMethod1 = app.BackgroundMethod1.Value;
+  Settings.BackgroundParameter1 = str2double(app.BackgroundParameter1.Value);
+  Settings.BackgroundParameter2 = str2double(app.BackgroundParameter2.Value);
   Settings.BackgroundCorrection2D = 0;
-  Settings.InvertCorrection = get(handles.InvertCorrection,'Value');
-  Settings.FieldOffset = get(handles.FieldOffset,'string');
-  Settings.BackgroundStart1 = get(handles.BackgroundStart1,'string');
-  Settings.BackgroundStart2 = get(handles.BackgroundStart2,'string');
-  Settings.MultiTauDimension = get(handles.MultiTauDimensions,'value');
-  Settings.MinimalContourLevel = get(handles.MinimalContourLevel,'string');
-  Settings.MaximalContourLevel = get(handles.MaximalContourLevel,'string');
-  Settings.XUpperLimit = get(handles.XUpperLimit,'string');
-  Settings.ReconstructionAlgorithm = get(handles.ReconstructionAlgorithm,'value');
-  Settings.MaxEntBackgroundParameter = str2double(get(handles.MaxEntBackgroundParameter,'string'));
-  Settings.MaxEntLagrangianMultiplier = str2double(get(handles.MaxEntLagrangianMultiplier,'string'));
-  Settings.Symmetrization = get(handles.Symmetrization_ListBox,'value');
+  Settings.InvertCorrection = app.InvertCorrection.Value;
+  Settings.FieldOffset = app.FieldOffset.Value;
+  Settings.BackgroundStart1 = app.BackgroundStart1.Value;
+  Settings.BackgroundStart2 = app.BackgroundStart2.Value;
+  Settings.MultiTauDimension = app.MultiTauDimensions.Value;
+  Settings.MinimalContourLevel = app.MinimalContourLevel.Value;
+  Settings.MaximalContourLevel = app.MaximalContourLevel.Value;
+  Settings.XUpperLimit = app.XUpperLimit.Value;
+  Settings.ReconstructionAlgorithm = app.ReconstructionAlgorithm.Value;
+  Settings.MaxEntBackgroundParameter = str2double(app.MaxEntBackgroundParameter.Value);
+  Settings.MaxEntLagrangianMultiplier = str2double(app.MaxEntLagrangianMultiplier.Value);
+  Settings.Symmetrization = app.Symmetrization_ListBox.Value;
   
   

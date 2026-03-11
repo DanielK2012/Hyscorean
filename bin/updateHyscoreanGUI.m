@@ -1,4 +1,4 @@
-function [handles] = updateHyscoreanGUI(handles,Processed)
+function updateHyscoreanGUI(app,Processed)
 %==========================================================================
 % Updater of the HYSCOREAN GUI
 %==========================================================================
@@ -11,6 +11,7 @@ function [handles] = updateHyscoreanGUI(handles,Processed)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -20,66 +21,82 @@ function [handles] = updateHyscoreanGUI(handles,Processed)
 try
   
   %Deactivate all pushbuttons until the graphics are rendered  & update info display
-  set(findall(handles.HyscoreanFigure, 'Style', 'pushbutton'),'enable','inactive')
-  set(findall(handles.HyscoreanFigure, 'Style', 'radiobutton'),'enable','inactive')
-  set(findall(handles.HyscoreanFigure, 'Style', 'checkbox'),'enable','inactive')
-  set(findall(handles.HyscoreanFigure, 'Style', 'edit'),'enable','inactive')
-  set(findall(handles.HyscoreanFigure, 'Style', 'slider'),'enable','inactive')
-  set(findall(handles.HyscoreanFigure, 'Style', 'popupmenu'),'enable','inactive')
-  set(handles.ProcessingInfo, 'String', 'Status: Rendering...')
+  % set(findall(app.HyscoreanFigure, 'Style', 'pushbutton'),'enable','inactive')
+  % set(findall(app.HyscoreanFigure, 'Style', 'radiobutton'),'enable','inactive')
+  % set(findall(app.HyscoreanFigure, 'Style', 'checkbox'),'enable','inactive')
+  % set(findall(app.HyscoreanFigure, 'Style', 'edit'),'enable','inactive')
+  % set(findall(app.HyscoreanFigure, 'Style', 'slider'),'enable','inactive')
+  % set(findall(app.HyscoreanFigure, 'Style', 'popupmenu'),'enable','inactive')
+
+  h_buttons = findall(app.HyscoreanFigure, 'Type', 'uibutton');
+  set(h_buttons, 'Enable', 'off');
+  h_radio = findall(app.HyscoreanFigure, 'Type', 'uiradiobutton');
+  set(h_radio, 'Enable', 'off');
+  h_check = findall(app.HyscoreanFigure, 'Type', 'uicheckbox');
+  set(h_check, 'Enable', 'off');
+  h_edit = findall(app.HyscoreanFigure, 'Type', 'uieditfield');
+  set(h_edit, 'Enable', 'off');
+  h_slider = findall(app.HyscoreanFigure, 'Type', 'uislider');
+  set(h_slider, 'Enable', 'off');
+  h_dropdown = findall(app.HyscoreanFigure, 'Type', 'uidropdown');
+  set(h_dropdown, 'Enable', 'off');
+
+  app.ProcessingInfo.Text = 'Status: Rendering...';
   %Re-deactivate all which were deactivated (just aesthetic)
-  if ~get(handles.Lorentz2GaussCheck,'Value')
-    enableDisableGUI(handles,'Lorent2Gauss','off')
+  if ~app.Lorentz2GaussCheck.Value
+    enableDisableGUI(app,'Lorent2Gauss','off')
   end
-  if ~handles.Data.NUSflag
-    enableDisableGUI(handles,'NUSReconstruction','off')
+  if ~app.Data.NUSflag
+    enableDisableGUI(app,'NUSReconstruction','off')
   end
-  enableDisableGUI(handles,'AutomaticBackground','off')
+  enableDisableGUI(app,'AutomaticBackground','off')
   
   
   drawnow;
   %Enable all graphics-related GUI components
-  set(handles.PreProcessedTrace,'visible','on')
-  set(handles.ImaginaryTrace,'visible','on')
-  set(handles.NonCorrectedTrace,'visible','on')
-  set(handles.PlotApodizationWindow,'visible','on')
-  set(handles.DetachSignalPlot,'visible','on')
-  set(handles.ChangeSignalPlotDimension,'visible','on')
-  set(handles.t1_Slider,'enable','on')
+  app.PreProcessedTrace.Visible = 'on';
+  app.ImaginaryTrace.Visible = 'on';
+  app.NonCorrectedTrace.Visible = 'on';
+  app.PlotApodizationWindow.Visible = 'on';
+  app.DetachSignalPlot.Visible = 'on';
+  app.ChangeSignalPlotDimension.Visible = 'on';
+  app.t1_Slider.Enable = 'on';
   %Set background of all signalPlot GUI components to white to match background
-  set(handles.PreProcessedTrace,'BackgroundColor','white')
-  set(handles.NonCorrectedTrace,'BackgroundColor','white')
-  set(handles.ImaginaryTrace,'BackgroundColor','white')
-  set(handles.PlotApodizationWindow,'BackgroundColor','white')
-  set(handles.DetachSignalPlot,'BackgroundColor','white')
+  % app.PreProcessedTrace.Visible = 'off';
+  % app.NonCorrectedTrace.Visible = 'off';
+  % app.ImaginaryTrace.Visible = 'off';
+  % app.PlotApodizationWindow.Visible = 'off';
+  % app.DetachSignalPlot.BackgroundColor = 'white';
   
   % Update signal plots
   %------------------------------------------------------------------------
-  Processed.TimeAxis1 = linspace(0,handles.Data.TimeStep1*size(Processed.Signal,1),size(Processed.Signal,1));
-  Processed.TimeAxis2 = linspace(0,handles.Data.TimeStep2*size(Processed.Signal,2),size(Processed.Signal,2));
+  Processed.TimeAxis1 = linspace(0,app.Data.TimeStep1*size(Processed.Signal,1),size(Processed.Signal,1));
+  Processed.TimeAxis2 = linspace(0,app.Data.TimeStep2*size(Processed.Signal,2),size(Processed.Signal,2));
   % Activate sliders
-  Npoints = length(Processed.TimeAxis2) - str2double(get(handles.ZeroFilling2,'string'));
-  set(handles.t1_Slider,'Min', 1, 'Max',Npoints , 'SliderStep', [1/(Npoints - 1) 5/(Npoints - 1)], 'Value', 1)
-  handles.PlotProcessedSignal = true;
+  % Npoints = length(Processed.TimeAxis2) - str2double(app.ZeroFilling2.Value);
+  % app.t1_Slider.Limits = [1 Npoints];
+  % app.t1_Slider.Step = 1/(Npoints - 1);
+  % app.t1_Slider.Value = 1;
+  app.PlotProcessedSignal = true;
   try
-    HyscoreanSignalPlot(handles,Processed);
+    HyscoreanSignalPlot(app,Processed);
   catch
   end
   
   % Update external signal plot GUI
   %------------------------------------------------------------------------
-  if ~isfield(handles,'SignalPlotIsDetached')
-    handles.SignalPlotIsDetached = false;
+  if isempty(app.SignalPlotIsDetached)
+    app.SignalPlotIsDetached = false;
   end
-  if handles.SignalPlotIsDetached
-    setappdata(0,'Processed',handles.Processed)
-    setappdata(0,'Data',handles.Data)
-    setappdata(0,'InvertCorrection',get(handles.InvertCorrection,'value'))
-    setappdata(0,'ZeroFilling1',str2double(get(handles.ZeroFilling1,'String')))
-    setappdata(0,'ZeroFilling2',str2double(get(handles.ZeroFilling2,'String')))
-    setappdata(0,'WindowLength1',get(handles.WindowLength1,'String'))
-    setappdata(0,'WindowLength2',get(handles.WindowLength2,'String'))
-    setappdata(0,'WindowType',get(handles.WindowType,'Value'))
+  if app.SignalPlotIsDetached
+    setappdata(0,'Processed',app.Processed)
+    setappdata(0,'Data',app.Data)
+    setappdata(0,'InvertCorrection',app.InvertCorrection.Value)
+    setappdata(0,'ZeroFilling1',str2double(app.ZeroFilling1.Value))
+    setappdata(0,'ZeroFilling2',str2double(app.ZeroFilling2.Value))
+    setappdata(0,'WindowLength1',app.WindowLength1.Value)
+    setappdata(0,'WindowLength2',app.WindowLength2.Value)
+    setappdata(0,'WindowType',app.WindowType.Value)
     
     %Call graphical settings GUI
     Hyscorean_detachedSignalPlot
@@ -94,7 +111,7 @@ try
   FrequencyAxis2 = Processed.axis2;
   
   %Get and set axis limits
-  XupperLimit = str2double(get(handles.XUpperLimit,'string'));
+  XupperLimit = str2double(app.XUpperLimit.Value);
   XlowerLimit = -XupperLimit;
   YupperLimit = XupperLimit;
   YlowerLimit = 0;
@@ -112,15 +129,15 @@ try
   end
   
   %Select current colormap
-  if isfield(handles.GraphicalSettings,'ColormapName')
-    colormap(colormap(handles.GraphicalSettings.ColormapName))
+  if isfield(app.GraphicalSettings,'ColormapName')
+    colormap(colormap(app.GraphicalSettings.ColormapName))
   else
     colormap('parula')
   end
   %Compute contour levels according to minimal contour level given by user
   Levels=GraphicalSettings.Levels;
-  MinimalContourLevel = str2double(get(handles.MinimalContourLevel,'string'))/100;
-  MaximalContourLevel = str2double(get(handles.MaximalContourLevel,'string'))/100;
+  MinimalContourLevel = str2double(app.MinimalContourLevel.Value)/100;
+  MaximalContourLevel = str2double(app.MaximalContourLevel.Value)/100;
   
   if MinimalContourLevel~=0 && GraphicalSettings.Absolute
     MaximalContourLevel = MaximalContourLevel*max(max(Spectrum));
@@ -134,78 +151,85 @@ try
     ContourLevelIncrement = (MaximalContourLevel - MinimalContourLevel)/Levels;
     ContourLevels = MinimalContourLevel:ContourLevelIncrement:MaximalContourLevel;
   end
-  handles.Processed.ContourLevels = ContourLevels;
+  app.Processed.ContourLevels = ContourLevels;
   
   %If blindspots are to be plotted, superimpose them to the spectrum
-  if get(handles.ImposeBlindSpots,'Value')
-    [BlindSpots,nu1,nu2] = imposeBlindSpots(handles);
+  if app.ImposeBlindSpots.Value
+    [BlindSpots,nu1,nu2] = imposeBlindSpots(app);
     BlindSpots = abs(BlindSpots);
     BlindSpots = BlindSpots/max(BlindSpots(:))*max(Spectrum(:));
     colormap('hot')
-    BlindSpots = pcolor(handles.mainPlot,nu1,nu2,BlindSpots);shading(handles.mainPlot,'flat'),
+    BlindSpots = pcolor(app.mainPlot,nu1,nu2,BlindSpots);shading(app.mainPlot,'flat'), ...
     alpha(BlindSpots,0.7);
-    hold(handles.mainPlot,'on')
+    hold(app.mainPlot,'on')
   end
   
   %Construct main plot
   switch GraphicalSettings.PlotType
     case 1 %Contour plot
-      if get(handles.ImposeBlindSpots,'Value')
+      if app.ImposeBlindSpots.Value
         %If blindspots are superimposed, make contour only black to adapt to hot-colormap
-        contour(handles.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels,'LineWidth',GraphicalSettings.LineWidth,'Color','k');
+        contour(app.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels,'LineWidth',GraphicalSettings.LineWidth,'Color','k');
       else
-        contour(handles.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels,'LineWidth',GraphicalSettings.LineWidth);
+        contour(app.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels,'LineWidth',GraphicalSettings.LineWidth);
       end
     case 2 %Filled contour plot
-      contourf(handles.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels);
+      contourf(app.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum,ContourLevels);
     case 3 %Pseudocolor plot
-      pcolor(handles.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum),shading(handles.mainPlot,'interp')
+      pcolor(app.mainPlot,FrequencyAxis1,FrequencyAxis2,Spectrum),shading(app.mainPlot,'interp')
   end
   
   %Add diagonal/antidiagonal and zero-vertical auxiliary lines
-  hold(handles.mainPlot,'on')
+  hold(app.mainPlot,'on')
   LineAxis = linspace(-XupperLimit,XupperLimit,1000);
-  handles.Diagonals = plot(handles.mainPlot,LineAxis,abs(LineAxis),'k-.');
-  set(handles.mainPlot,'LineWidth',0.5)
-  handles.VerticalLine = plot(handles.mainPlot,zeros(length(LineAxis)),abs(LineAxis),'k-','LineWidth',0.5);
-  set(handles.mainPlot,'LineWidth',1)
-  hold(handles.mainPlot,'off')
+  app.Diagonals = plot(app.mainPlot,LineAxis,abs(LineAxis),'k-.');
+  set(app.mainPlot,'LineWidth',0.5)
+  app.VerticalLine = plot(app.mainPlot,zeros(length(LineAxis)),abs(LineAxis),'k-','LineWidth',0.5);
+  set(app.mainPlot,'LineWidth',1)
+  hold(app.mainPlot,'off')
   
   %Format axes
-  grid(handles.mainPlot,'on')
-  set(handles.mainPlot,'ylim',[YlowerLimit YupperLimit],'xlim',[XlowerLimit XupperLimit])
-  xlabel(handles.mainPlot,'\nu_1 [MHz]');
-  ylabel(handles.mainPlot,'\nu_2 [MHz]');
-  currentXTicks = xticks(handles.mainPlot);
+  grid(app.mainPlot,'on')
+  set(app.mainPlot,'ylim',[YlowerLimit YupperLimit],'xlim',[XlowerLimit XupperLimit])
+  xlabel(app.mainPlot,'\nu_1 [MHz]');
+  ylabel(app.mainPlot,'\nu_2 [MHz]');
+  currentXTicks = xticks(app.mainPlot);
   currentYTicks = currentXTicks(currentXTicks>=0);
-  xticks(handles.mainPlot,currentXTicks)
-  yticks(handles.mainPlot,currentYTicks)
-  set(handles.mainPlot,'yticklabel',currentYTicks,'xticklabel',currentXTicks)
+  xticks(app.mainPlot,currentXTicks)
+  yticks(app.mainPlot,currentYTicks)
+  set(app.mainPlot,'YTickLabel',currentYTicks,'XTickLabel',currentXTicks)
   
   
   % Finish & Exit
   %------------------------------------------------------------------------
   
   %Reactivate all pushbuttons & update info display
-  set(handles.ProcessingInfo, 'String', 'Status: Finished');drawnow
-  set(findall(handles.HyscoreanFigure, 'Style', 'pushbutton'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'radiobutton'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'checkbox'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'edit'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'slider'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'popupmenu'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'text'),'enable','on')
+  app.ProcessingInfo.Text = 'Status: Finished'; drawnow;
+  % set(findall(app.HyscoreanFigure, 'Style', 'pushbutton'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'radiobutton'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'checkbox'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'edit'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'slider'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'popupmenu'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'text'),'enable','on')
   
+  set(h_buttons, 'Enable', 'on');
+  set(h_radio, 'Enable', 'on');
+  set(h_check, 'Enable', 'on');
+  set(h_edit, 'Enable', 'on');
+  set(h_slider, 'Enable', 'on');
+  set(h_dropdown, 'Enable', 'on');
+
   %Re-deactivate all which were deactivated
-  if ~get(handles.Lorentz2GaussCheck,'Value')
-    enableDisableGUI(handles,'Lorent2Gauss','off')
+  if ~app.Lorentz2GaussCheck.Value
+    enableDisableGUI(app,'Lorent2Gauss','off')
   end
-  if ~handles.Data.NUSflag
-    enableDisableGUI(handles,'NUSReconstruction','off')
+  if ~app.Data.NUSflag
+    enableDisableGUI(app,'NUSReconstruction','off')
   else
-    enableDisableGUI(handles,'NUSReconstruction','on')
+    enableDisableGUI(app,'NUSReconstruction','on')
   end
-  enableDisableGUI(handles,'AutomaticBackground','on')
+  enableDisableGUI(app,'AutomaticBackground','on')
   
   
 catch Error
@@ -213,27 +237,35 @@ catch Error
   w = errordlg(sprintf('Error found during rendering of graphics: \n %s',Error.message));
   waitfor(w);
   %Reactivate all pushbuttons & update info display
-  set(handles.ProcessingInfo, 'String', 'Status: Finished');drawnow
-  set(findall(handles.HyscoreanFigure, 'Style', 'pushbutton'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'radiobutton'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'checkbox'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'edit'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'slider'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'popupmenu'),'enable','on')
-  set(findall(handles.HyscoreanFigure, 'Style', 'text'),'enable','on')
+  app.ProcessingInfo.Text = 'Status: Error'; drawnow;
+  % set(findall(app.HyscoreanFigure, 'Style', 'pushbutton'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'radiobutton'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'checkbox'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'edit'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'slider'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'popupmenu'),'enable','on')
+  % set(findall(app.HyscoreanFigure, 'Style', 'text'),'enable','on')
   
+  set(h_buttons, 'Enable', 'on');
+  set(h_radio, 'Enable', 'on');
+  set(h_check, 'Enable', 'on');
+  set(h_edit, 'Enable', 'on');
+  set(h_slider, 'Enable', 'on');
+  set(h_dropdown, 'Enable', 'on');
+  app.TraceButtonGroup.Enable = 'on';
+
   %Re-deactivate all which were deactivated
-  if ~get(handles.Lorentz2GaussCheck,'Value')
-    enableDisableGUI(handles,'Lorent2Gauss','off')
+  if ~app.Lorentz2GaussCheck.Value
+    enableDisableGUI(app,'Lorent2Gauss','off')
   end
-  if ~handles.Data.NUSflag
-    enableDisableGUI(handles,'NUSReconstruction','off')
+  if ~app.Data.NUSflag
+    enableDisableGUI(app,'NUSReconstruction','off')
   else
-    enableDisableGUI(handles,'NUSReconstruction','on')
+    enableDisableGUI(app,'NUSReconstruction','on')
   end
-  enableDisableGUI(handles,'AutomaticBackground','on')
+  enableDisableGUI(app,'AutomaticBackground','on')
   
   
 end
 
-drawnow
+drawnow;

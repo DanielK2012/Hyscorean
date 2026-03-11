@@ -1,4 +1,4 @@
-function [BlinSpotsMap,BlindSpotsAxis1,BlindSpotsAxis2] = imposeBlindSpots(handles)
+function [BlinSpotsMap,BlindSpotsAxis1,BlindSpotsAxis2] = imposeBlindSpots(app)
 %==========================================================================
 % Blindspot map
 %==========================================================================
@@ -7,6 +7,7 @@ function [BlinSpotsMap,BlindSpotsAxis1,BlindSpotsAxis2] = imposeBlindSpots(handl
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -14,12 +15,12 @@ function [BlinSpotsMap,BlindSpotsAxis1,BlindSpotsAxis2] = imposeBlindSpots(handl
 %==========================================================================
 
 %Get current experimental tau-values
-TauValues = handles.currentTaus;
+TauValues = app.currentTaus;
 TauValues=TauValues/1e3;
 %Use a fixed dimension with good resolution-speed compromise
 Dimension = 500; 
 %Get the current limits of the spectrum
-SpectralLimit = str2double(get(handles.XUpperLimit,'string'));
+SpectralLimit = str2double(app.XUpperLimit.Value);
 %Generate the axes
 BlindSpotsAxis1 = linspace(-SpectralLimit,SpectralLimit,Dimension);
 BlindSpotsAxis2 = BlindSpotsAxis1;

@@ -1,4 +1,4 @@
-function handles = loadSettingsHyscorean(handles)
+function loadSettingsHyscorean(app)
 %==========================================================================
 % Load Settings
 %==========================================================================
@@ -9,6 +9,7 @@ function handles = loadSettingsHyscorean(handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2018-2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -27,71 +28,71 @@ try
   FileImport = load(fullfile(Path,File));
   Settings = FileImport.Settings;
   %Set all UI elements to the corresponding values
-  set(handles.L2G_tau,'string',Settings.tauFactor1);
-  set(handles.L2G_tau2,'string',Settings.tauFactor2);
-  set(handles.L2G_sigma,'string',Settings.sigmaFactor1);
-  set(handles.L2G_sigma2,'string',Settings.sigmaFactor2);
-  set(handles.ZeroFilling2,'string',Settings.zerofilling2);
-  set(handles.ZeroFilling1,'string',Settings.zerofilling1);
-  set(handles.MaxEntBackgroundParameter,'string',Settings.MaxEntBackgroundParameter);
-  set(handles.MaxEntLagrangianMultiplier,'string',Settings.MaxEntLagrangianMultiplier);
-  set(handles.WindowType,'value',Settings.WindowType);
+  app.L2G_tau.Value = num2str(Settings.tauFactor1);
+  app.L2G_tau2.Value = num2str(Settings.tauFactor2);
+  app.L2G_sigma.Value = num2str(Settings.sigmaFactor1);
+  app.L2G_sigma2.Value = num2str(Settings.sigmaFactor2);
+  app.ZeroFilling2.Value = num2str(Settings.zerofilling2);
+  app.ZeroFilling1.Value = num2str(Settings.zerofilling1);
+  app.MaxEntBackgroundParameter.Value = num2str(Settings.MaxEntBackgroundParameter);
+  app.MaxEntLagrangianMultiplier.Value = num2str(Settings.MaxEntLagrangianMultiplier);
+  app.WindowType.Value = Settings.WindowType;
   switch Settings.WindowType
-    case 1
+    case 'Hamming'
       WindowType =  'hamming';
-    case 2
+    case 'Chebyshev'
       WindowType =  'chebyshev';
-    case 3
+    case 'Welch'
       WindowType =  'welch';
-    case 4
+    case 'Blackman'
       WindowType = 'blackman';
-    case 5
+    case 'Bartlett'
       WindowType = 'bartlett';
-    case 6
+    case 'Connes'
       WindowType = 'connes';
-    case 7
+    case 'Cosine'
       WindowType = 'cosine';
-    case 8
+    case '25% Tukey'
       WindowType = 'tukey25';
-    case 9
+    case '50% Tukey'
       WindowType = 'tukey50';
-    case 10
+    case '75% Tukey'
       WindowType = 'tukey75';
-    case 11
+    case 'Hann'
       WindowType = 'hann';
-    case 12
+    case 'None'
       WindowType = 'none';
   end
   try
-    handles.WindowTypeString = WindowType;
-    set(handles.WindowLength1,'string',Settings.WindowDecay1);
-    set(handles.WindowLength2,'string',Settings.WindowDecay2);
-    set(handles.Symmetrization_ListBox,'value',Settings.Symmetrization);
+    app.WindowTypeString = WindowType;
+    app.WindowLength1.Value = num2str(Settings.WindowDecay1);
+    app.WindowLength2.Value = num2str(Settings.WindowDecay2);
+    app.Symmetrization_ListBox.Value = Settings.Symmetrization;
     
   catch
   end
-  set(handles.WindowType,'value',Settings.WindowType)
-  set(handles.BackgroundParameter1,'string',Settings.BackgroundParameter1);
-  set(handles.BackgroundParameter2,'string',Settings.BackgroundParameter2);
-  set(handles.Lorentz2GaussCheck,'value',Settings.Lorentz2GaussCheck);
-  set(handles.BackgroundStart1,'string',Settings.BackgroundStart1);
-  set(handles.BackgroundStart2,'string',Settings.BackgroundStart2);
-  set(handles.MinimalContourLevel,'string',Settings.MinimalContourLevel);
+  app.WindowType.Value = Settings.WindowType;
+  app.BackgroundParameter1.Value = num2str(Settings.BackgroundParameter1);
+  app.BackgroundParameter2.Value = num2str(Settings.BackgroundParameter2);
+  app.Lorentz2GaussCheck.Value = Settings.Lorentz2GaussCheck;
+  app.BackgroundStart1.Value = Settings.BackgroundStart1;
+  app.BackgroundStart2.Value = Settings.BackgroundStart2;
+  app.MinimalContourLevel.Value = Settings.MinimalContourLevel;
   try
-  set(handles.MaximalContourLevel,'string',Settings.MaximalContourLevel);
+    app.MaximalContourLevel.Value = Settings.MaximalContourLevel;
   catch
   end
-  set(handles.XUpperLimit,'string',Settings.XUpperLimit);
-  set(handles.FieldOffset,'string',Settings.FieldOffset);
+  app.XUpperLimit.Value = Settings.XUpperLimit;
+  app.FieldOffset.Value = Settings.FieldOffset;
   try %Try because if not the exact same file is loaded, value of list may exceed current one
-    set(handles.MultiTauDimensions,'value',Settings.MultiTauDimension);
+    app.MultiTauDimensions.Value = Settings.MultiTauDimension;
   catch
   end
   %Set buttons
-  set(handles.BackgroundMethod2,'Value',Settings.BackgroundMethod2);
-  set(handles.BackgroundMethod1,'Value',Settings.BackgroundMethod1);
-  set(handles.InvertCorrection,'Value',Settings.InvertCorrection)
-  set(handles.ReconstructionAlgorithm,'Value',Settings.ReconstructionAlgorithm)
+  app.BackgroundMethod2.Value = Settings.BackgroundMethod2;
+  app.BackgroundMethod1.Value = Settings.BackgroundMethod1;
+  app.InvertCorrection.Value = Settings.InvertCorrection;
+  app.ReconstructionAlgorithm.Value = Settings.ReconstructionAlgorithm;
   
 catch
   %If user loads another type of file then error occurs. Inform user.

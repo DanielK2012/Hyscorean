@@ -11,6 +11,7 @@ function Blindspot_simulator(FrequencyAxis1,FrequencyAxis2,Spectrum,SpecLim,spcc
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -49,7 +50,7 @@ end
 set(gcf,'NumberTitle','off','Name','HYSCORE Blind spot simulator','Position',[Position(1) Position(2) 985 445])
 %Construct slider
 SliderHandle = uicontrol('units','normalized','tag','slider','position',[0.04 0.08 0.025 0.90],'Style','slider','value',80,...
-                    'min',80,'max',350,'sliderstep',[1/270 1/270],'callback',{@BlindspotsSpoter});
+                    'min',80,'max',600,'sliderstep',[1/260 1/260],'callback',{@BlindspotsSpoter});
 %Construct pushbutton
 uicontrol('units','normalized','string','Add Tau','position',[0.015 0.01 0.08 0.06],...
           'Style','pushbutton','callback',{@addTau,SliderHandle});

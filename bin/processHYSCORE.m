@@ -1,4 +1,4 @@
-function [handles]=processHYSCORE(handles)
+function processHYSCORE(app)
 %==========================================================================
 % HYSCORE Processing Main Protocol 
 %==========================================================================
@@ -12,6 +12,7 @@ function [handles]=processHYSCORE(handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -23,50 +24,61 @@ function [handles]=processHYSCORE(handles)
 %==========================================================================
 
 %Get processing parameters from corresponding UI elements
-ZeroFilling1 = str2double(get(handles.ZeroFilling1,'string'));
-ZeroFilling2 = str2double(get(handles.ZeroFilling2,'string'));
-WindowDecay1 = str2double(get(handles.WindowLength1,'string'));
-WindowDecay2 = str2double(get(handles.WindowLength2,'string'));
-BackgroundParameter = 10^(str2double(get(handles.MaxEntBackgroundParameter,'string')));
-LagrangeMultiplier = str2double(get(handles.MaxEntLagrangianMultiplier,'string'));
-CombinationsSelection = get(handles.MultiTauDimensions,'Value');
-BackgroundCorrectionParameter1 = str2double(get(handles.BackgroundParameter1,'string'));
-BackgroundCorrectionParameter2 = str2double(get(handles.BackgroundParameter2,'string'));
-BackgroundStart1 = str2double(get(handles.BackgroundStart1,'string'));
-BackgroundStart2 = str2double(get(handles.BackgroundStart2,'string'));
-InvertCorrection = get(handles.InvertCorrection,'Value');
-L2GParameters.tauFactor2 = str2double(get(handles.L2G_tau2,'string'));
-L2GParameters.sigmaFactor2 = str2double(get(handles.L2G_sigma2,'string'));
-L2GParameters.tauFactor1 = str2double(get(handles.L2G_tau,'string'));
-L2GParameters.sigmaFactor1 = str2double(get(handles.L2G_sigma,'string'));
-ApoWindowName = handles.WindowTypeString;
+ZeroFilling1 = str2double(app.ZeroFilling1.Value);
+ZeroFilling2 = str2double(app.ZeroFilling2.Value);
+WindowDecay1 = str2double(app.WindowLength1.Value);
+WindowDecay2 = str2double(app.WindowLength2.Value);
+BackgroundParameter = 10^(str2double(app.MaxEntBackgroundParameter.Value));
+LagrangeMultiplier = str2double(app.MaxEntLagrangianMultiplier.Value);
+CombinationsSelection_val = app.MultiTauDimensions.Value;
+CombinationsSelection_items = app.MultiTauDimensions.Items;
+BackgroundCorrectionParameter1 = str2double(app.BackgroundParameter1.Value);
+BackgroundCorrectionParameter2 = str2double(app.BackgroundParameter2.Value);
+BackgroundStart1 = str2double(app.BackgroundStart1.Value);
+BackgroundStart2 = str2double(app.BackgroundStart2.Value);
+InvertCorrection = app.InvertCorrection.Value;
+L2GParameters.tauFactor2 = str2double(app.L2G_tau2.Value);
+L2GParameters.sigmaFactor2 = str2double(app.L2G_sigma2.Value);
+L2GParameters.tauFactor1 = str2double(app.L2G_tau.Value);
+L2GParameters.sigmaFactor1 = str2double(app.L2G_sigma.Value);
+ApoWindowName = app.WindowTypeString;
 
 %Get mounted data
-Data = handles.Data;
+Data = app.Data;
 
 %==========================================================================
 % Tau-Signals Combination
 %==========================================================================
 
 %Get the combination of tau-values chosen by user
-TauIndexes  = handles.Data.Combinations(CombinationsSelection,:);
-handles.currentTaus = handles.Data.TauValues(TauIndexes(TauIndexes~=0));
-if isfield(handles.Data, 'correctprocessing')
-    if handles.Data.correctprocessing == false
+CombinationsSelection_idx = [];
+for i = 1:length(CombinationsSelection_items)
+    if strcmp(CombinationsSelection_items{i}, CombinationsSelection_val)
+        CombinationsSelection_idx = i;
+        break;
+    end
+end
+if isempty(CombinationsSelection_idx)
+    errordlg('Error: No tau value found!');
+end
+TauIndexes  = app.Data.Combinations(CombinationsSelection_idx,:);
+app.currentTaus = app.Data.TauValues(TauIndexes(TauIndexes~=0));
+if isfield(app.Data, 'correctprocessing')
+    if app.Data.correctprocessing == false
         warndlg('Inconsistent time axis for different tau-values can lead to incorrect FT of echo data','warning');
     end
 end
-handles.currentIndexes = TauIndexes(TauIndexes~=0);
+app.currentIndexes = TauIndexes(TauIndexes~=0);
 %If first time or user has changed selection then continue
-if handles.TauSelectionSwitch
+if app.TauSelectionSwitch
   %Set selection icon to waiting
-  set(handles.TauSelectionWaiting,'visible','on'),drawnow
+  app.TauSelectionLamp.Color = app.amber_color; drawnow;
   %Since signal is combined anew, background correction has to be repeated
-  handles.backgroundCorrectionSwitch = true;
+  app.backgroundCorrectionSwitch = true;
   %Combine the different tau-signals into one according to selection
   Data.Integral = zeros(size(Data.TauSignals,2),size(Data.TauSignals,3));
-  for TauIndex = 1:length(handles.currentTaus)
-    CurrentTauIntegral = squeeze(Data.TauSignals(handles.currentIndexes(TauIndex),:,:));
+  for TauIndex = 1:length(app.currentTaus)
+    CurrentTauIntegral = squeeze(Data.TauSignals(app.currentIndexes(TauIndex),:,:));
     %Combine signals in time-domain
     % no normalization of signals before FT -> intensity of signals introduce a weighting of different TauValues, which is otherwise lost
     %Data.Integral  = Data.Integral  + CurrentTauIntegral/max(max(CurrentTauIntegral));
@@ -76,10 +88,10 @@ if handles.TauSelectionSwitch
   Data.TimeAxis1 = linspace(0,Data.TimeStep1*size(Data.Integral,1),size(Data.Integral,1));
   Data.TimeAxis2 = linspace(0,Data.TimeStep2*size(Data.Integral,2),size(Data.Integral,2));
   %Set tau selection icon to check
-  set(handles.TauSelectionWaiting,'visible','off')
-  set(handles.TauSelectionCheck,'visible','on')
+  % set(app.TauSelectionWaiting,'visible','off')
+  app.TauSelectionLamp.Color = app.green_color;
   %Set background icon to waiting
-  set(handles.BackgroundCorrectionWaiting,'visible','on'),drawnow
+  app.BackgroundCorrectionLamp.Color = app.amber_color; drawnow;
 end
 
 %==========================================================================
@@ -87,40 +99,40 @@ end
 %==========================================================================
 
 %If first time or user has changed background parameters then continue
-if handles.backgroundCorrectionSwitch
+if app.backgroundCorrectionSwitch
   %Set-up options for the two individual background corrections
-  switch get(handles.BackgroundMethod1,'Value')
-    case 1 %Fractal
+  switch app.BackgroundMethod1.Value
+    case 'Fractal'
       options.BackgroundMethod1 = 0;
       options.BackgroundPolynomOrder1 = [];
       options.BackgroundFractalDimension1 = [];
-    case 2 %n-Dimensional
+    case 'n-Dimensional'
       options.BackgroundMethod1 = 1;
       options.BackgroundPolynomOrder1 = [];
       options.BackgroundFractalDimension1 = BackgroundCorrectionParameter1;
-    case 3 %Polynomial
+    case 'Polynomial'
       options.BackgroundMethod1 = 2;
       options.BackgroundPolynomOrder1 = BackgroundCorrectionParameter1;
       options.BackgroundFractalDimension1 = [];
-    case 4 %Exponential
+    case 'Exponential'
       options.BackgroundMethod1 = 3;
       options.BackgroundPolynomOrder1 = BackgroundCorrectionParameter1;
       options.BackgroundFractalDimension1 = [];
   end
-  switch get(handles.BackgroundMethod2,'Value')
-    case 1 %Fractal
+  switch app.BackgroundMethod2.Value
+    case 'Fractal'
       options.BackgroundMethod2 = 0;
       options.BackgroundPolynomOrder2 = [];
       options.BackgroundFractalDimension2 = [];
-    case 2 %n-Dimensional
+    case 'n-Dimensional'
       options.BackgroundMethod2 = 1;
       options.BackgroundPolynomOrder2 = [];
       options.BackgroundFractalDimension2 = BackgroundCorrectionParameter2;
-    case 3 %Polynomial
+    case 'Polynomial'
       options.BackgroundMethod2 = 2;
       options.BackgroundPolynomOrder2 = BackgroundCorrectionParameter2;
       options.BackgroundFractalDimension2 = [];
-    case 4 %Exponential
+    case 'Exponential'
       options.BackgroundMethod2 = 3;
       options.BackgroundPolynomOrder2 = BackgroundCorrectionParameter2;
       options.BackgroundFractalDimension2 = [];
@@ -132,7 +144,7 @@ if handles.backgroundCorrectionSwitch
   options.InvertCorrection = InvertCorrection;
   
   %Inform user of current step in progress
-  set(handles.ProcessingInfo, 'String', 'Status: Correct background'); drawnow;
+  app.ProcessingInfo.Text = 'Status: Correcting background'; drawnow;
   
   %If data is NUS then set zero-augmented points to NaN for MATLAB to ignore them
   if Data.NUSflag
@@ -161,44 +173,43 @@ if handles.backgroundCorrectionSwitch
   end
 
   %Set background correction icon to check
-  set(handles.BackgroundCorrectionWaiting,'visible','off')
-  set(handles.BackgroundCorrectionCheck,'visible','on')
+  app.BackgroundCorrectionLamp.Color = app.green_color;
   drawnow;
 else
-  Data = handles.Data;
+  Data = app.Data;
 end
 %Set all passed switches off for the next processing to skip them
-handles.TauSelectionSwitch = false;
-handles.backgroundCorrectionSwitch = false;
-handles.MountDataSwitch = false;
+app.TauSelectionSwitch = false;
+app.backgroundCorrectionSwitch = false;
+app.MountDataSwitch = false;
 
 %==========================================================================
 % NUS Reconstruction
 %==========================================================================
 
 %Check if input is a NUS signal, otherwise skip this step
-if Data.NUSflag && handles.ReconstructionSwitch
+if Data.NUSflag && app.ReconstructionSwitch
   %Set reconstruction icon to waiting
-  set(handles.ReconstructionWaiting,'visible','on'); drawnow;
+  app.ReconstructionLamp.Color = app.amber_color; drawnow;
   %Update status display
-  set(handles.ProcessingInfo, 'String', 'Status: Reconstructing signal'); drawnow;
+  app.ProcessingInfo.Text = 'Status: Reconstructing signal'; drawnow;
   %Cosntruct point sampling schedule from NUS grid
   [Rows,Columns] = find(Data.NUSgrid==1);
   Schedule = [Rows,Columns];
   
   %Perform NUS reconstruction according to method selection by user
-  switch get(handles.ReconstructionAlgorithm,'Value')
-    case 1 %constant-lambda CAMERA
+  switch app.ReconstructionAlgorithm.Value
+    case 'constant-lambda CAMERA'
       [Data.ReconstructedSignal,FunctionEvaluations,~,LagrangeMultipliers_Used] = camera_hyscorean(Data.PreProcessedSignal,Schedule,[],LagrangeMultiplier,BackgroundParameter);
-    case 2 %constant-aim CAMERA
+    case 'constant-aim CAMERA'
       [Data.ReconstructedSignal,FunctionEvaluations,~,LagrangeMultipliers_Used] = camera_hyscorean(Data.PreProcessedSignal,Schedule);
-    case 3 %FFM-CG
+    case 'FFM-CG'
       [Data.ReconstructedSignal,FunctionEvaluations] = ffm_cg_hyscorean(Data.PreProcessedSignal,Schedule,BackgroundParameter,5000);
-    case 4 %FFM-GD
+    case 'FFM-GD'
       [Data.ReconstructedSignal,FunctionEvaluations] = ffm_gd_hyscorean(Data.PreProcessedSignal,Schedule,BackgroundParameter,5000);
-    case 5 %IST-S Reconstruction
+    case 'IST-S Reconstruction'
       [Data.ReconstructedSignal,FunctionEvaluations] = ists_hyscorean(Data.PreProcessedSignal,Data.NUSgrid,0.98,5000);
-    case 6 %IST-D Reconstruction
+    case 'IST-D Reconstruction'
       [Data.ReconstructedSignal,FunctionEvaluations] = istd_hyscorean(Data.PreProcessedSignal,Data.NUSgrid,0.98,5000);
   end
   
@@ -209,10 +220,9 @@ if Data.NUSflag && handles.ReconstructionSwitch
   Data.ReconstructionConvergence = FunctionEvaluations;
   
   %Turn the switch of the reconstruction off
-  handles.ReconstructionSwitch = false;
+  app.ReconstructionSwitch = false;
   %Set reconstruction icon to check
-  set(handles.ReconstructionWaiting,'visible','off')
-  set(handles.ReconstructionCheck,'visible','on')
+  app.ReconstructionLamp.Color = app.green_color;
   
 elseif ~Data.NUSflag
   
@@ -226,13 +236,13 @@ end
 %==========================================================================
 
 %If symmetrization is requested later, then enforce a square matrix
-if ~strcmp(handles.SymmetrizationString,'None')
+if ~strcmp(app.SymmetrizationString,'None')
   %Use the largest zero-filling requested
   ZeroFilling1 = max(ZeroFilling1,ZeroFilling2);
   ZeroFilling2 = max(ZeroFilling1,ZeroFilling2);
   %Update this change in the GUI so that user knows
-  set(handles.ZeroFilling1, 'String',ZeroFilling1 );
-  set(handles.ZeroFilling2, 'String',ZeroFilling2 );
+  app.ZeroFilling1.Value = string(ZeroFilling1 );
+  app.ZeroFilling2.Value = string(ZeroFilling2 );
   drawnow;
 end
 
@@ -249,7 +259,7 @@ Processed.TimeAxis2 = linspace(0,(Dimension2 + ZeroFilling2)*Data.TimeStep2,(Dim
 %==========================================================================
 
 %Perform L2G transformation only if requested by user
-if get(handles.Lorentz2GaussCheck,'Value')
+if app.Lorentz2GaussCheck.Value
   % Sometimes something may be messed up during mountdata.m check that dimensions are consistent
   if ~(size(Processed.Signal,1) == length(Processed.TimeAxis1) && size(Processed.Signal,2) == length(Processed.TimeAxis2))
     temp = Processed.TimeAxis1;
@@ -283,7 +293,7 @@ Spectrum = fftshift(fft2(Processed.Signal));
 %==========================================================================
 
 %If requested by user, symmetrize the spectrum
-switch handles.SymmetrizationString
+switch app.SymmetrizationString
   case 'Diagonal'
     Spectrum = (Spectrum.*Spectrum').^0.5;
   case 'Anti-Diagonal'
@@ -301,7 +311,7 @@ end
 Processed.spectrum = Spectrum;
 Processed.axis1 = FrequencyAxis1;
 Processed.axis2 = FrequencyAxis2;
-handles.Data = Data;
-handles.Processed = Processed;
+app.Data = Data;
+app.Processed = Processed;
 
 return

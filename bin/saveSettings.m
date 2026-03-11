@@ -1,4 +1,4 @@
-function saveSettings(handles)
+function saveSettings(app)
 %==========================================================================
 % Save Settings
 %==========================================================================
@@ -9,6 +9,7 @@ function saveSettings(handles)
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -22,7 +23,7 @@ if File==0
   return
 end
 %Get the current settings
-Settings = getSettings(handles);
+Settings = getSettings(app);
 
 %Send settings structure to base workspace
 assignin('base', 'Settings', Settings);

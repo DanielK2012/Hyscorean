@@ -13,6 +13,7 @@
 %==========================================================================
 %
 % Copyright (C) 2019  Luis Fabregas, Hyscorean 2019
+% Copyright (C) 2026  Daniel Klose,  Hyscorean 2026
 % 
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License 3.0 as published by
@@ -42,8 +43,8 @@ allFilesOK = true;
 JavaVersion  = version('-java');
 
 fprintf('===========================================================================\n')
-fprintf('Hyscorean: HYSCORE processing and analysis software     (c)2018 ETH Zurich \n')
-fprintf('Version 1.0                                                                \n')
+fprintf('Hyscorean: HYSCORE processing and analysis software     (c)2026 ETH Zurich \n')
+fprintf('Version 2026.1a                                                            \n')
 fprintf('===========================================================================\n')
 fprintf('Installation info                                                          \n')
 fprintf('     Path:           %s \n',InstallationPath)
