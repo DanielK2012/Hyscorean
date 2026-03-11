@@ -101,7 +101,7 @@ switch Integration
       end
       % Update on the status of integration
       if isfield(options,'status')
-      set(options.status, 'String', sprintf('Status: Integr. Echoes %2.1f%%',iDimension2/size(AverageEcho,2)*100)); drawnow;
+        options.status = sprintf('Status: Integr. Echoes %2.1f%%',iDimension2/size(AverageEcho,2)*100); drawnow;
       end
     end
     % Separate real and imaginary part

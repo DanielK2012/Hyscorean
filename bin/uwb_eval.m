@@ -104,17 +104,23 @@ if exist('filename','var') % by file
         error(ErrorText);
     end
     
-    conf = SavedData.conf;
+    if isfield(SavedData,'conf')
+        conf = SavedData.conf;
+    elseif isfield(SavedData, 'settings')
+        conf = SavedData.settings.conf;
+    else
+        error('conf structure is not found in file');
+    end
 else
     % get everything from workspace
     % conf
-    if evalin('base','exist(''conf'',''var'')');
+    if evalin('base','exist(''conf'',''var'')')
         conf = evalin('base','conf');
     else
         error('Could not find conf in workspace');
     end
     % current experiment
-    if evalin('base','exist(''currexp'',''var'')');
+    if evalin('base','exist(''currexp'',''var'')')
         estr = evalin('base','currexp');
     else
         error('Could not find currexp in workspace');

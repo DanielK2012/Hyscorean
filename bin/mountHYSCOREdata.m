@@ -499,8 +499,13 @@ switch FileExtension
             
             TimeAxis1 = TimeAxis1ordered;
             % Get the time axis for plotting the original echos before downconversion
-            exp = load(FileNames{1},'conf');
-            fsmp = exp.conf.std.dig_rate;
+            try
+                exp = load(FileNames{1},'settings');
+                fsmp = exp.settings.conf.std.dig_rate;
+            catch
+                exp = load(FileNames{1},'conf');
+                fsmp = exp.conf.std.dig_rate;
+            end
             dtatimeaxis = linspace(0,size(dta{1},1)-1,size(dta{1},1))./fsmp; 
         end
         
