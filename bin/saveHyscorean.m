@@ -259,7 +259,7 @@ if isfield(app.Data,'AWG_Parameters') && ~isempty(app.Data.AWG_Parameters)
     else
         reportdata.Pulse180Length  = AWG_Parameters.events{3}.pulsedef.tp;
     end
-    reportdata.MW_Frequency = AWG_Parameters.LO + AWG_Parameters.nu_obs;
+    reportdata.MW_Frequency = sum(AWG_Parameters.LO) + AWG_Parameters.nu_obs;
     reportdata.ShotRepTime = AWG_Parameters.reptime/1e6;
     reportdata.ShotsPerLoop = AWG_Parameters.shots;
     reportdata.NbScansDone = AWG_Parameters.avgs;
@@ -364,7 +364,7 @@ try
         FirstPulseLength = Param.Pulse90;
     elseif isfield(app.Data,'AWG_Parameters')
         DataForFitting.Field =  0.1*app.Data.AWG_Parameters.B;%mT
-        DataForFitting.mwFreq = app.Data.AWG_Parameters.LO + app.Data.AWG_Parameters.nu_obs;
+        DataForFitting.mwFreq = sum(app.Data.AWG_Parameters.LO) + app.Data.AWG_Parameters.nu_obs;
         FirstPulseLength = app.Data.AWG_Parameters.events{1}.pulsedef.tp/1000;
     end
     DataForFitting.ExciteWidth = 1/FirstPulseLength;
