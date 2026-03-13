@@ -1553,7 +1553,7 @@ return
 %===================================================================
 function varargout = residuals_(x,ExpSpec,FitDat,FitOpt)
 [rms,stopCode,simspec] = assess(x,ExpSpec,FitDat,FitOpt);
-out = {rms,stopCode,simspec};
+out = {rms,simspec,stopCode};
 varargout = out(1:nargout);
 %===================================================================
 
