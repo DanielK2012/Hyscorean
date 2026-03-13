@@ -43,7 +43,11 @@ SavePath = getpref('hyscorean','savepath');
 DateFormatOut = 'yyyymmdd';
 Date = datestr(date,DateFormatOut);
 %Get file identifier
-Identifier = SaveHyscoreanSettings.IdentifierName;
+if isfield(SaveHyscoreanSettings, 'IdentifierName')
+    Identifier = SaveHyscoreanSettings.IdentifierName;
+else
+    Identifier = 'HyscoreanSave';
+end
 %Get file path
 SaveDirectory = sprintf('%s_%s',Date,Identifier);
 FullPath = fullfile(SavePath,SaveDirectory);

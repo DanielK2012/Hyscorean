@@ -1192,7 +1192,7 @@ try
         case 1 % center of range
             startx = zeros(FitData.nParameters,1);
         case 2 % random
-            startx = 2*rand(FitData.nParameters,1) - 1;
+            startx = 2*rand(FitData.nParameters,1) - 1; % [-1 1]
             startx(FitData.inactiveParams) = 0;
         case 3 % selected fit set
             h = findobj('Tag','SetListBox');
@@ -1221,24 +1221,28 @@ try
         fitspc = FitData.ExpSpecScaled;
     end
     
+    FitOpts.Verbosity = 1;
+    FitOpts.IterFcn = @assess_stop;
     funArgs = {fitspc,FitData,FitOpts};  % input args for assess and residuals_
     
+    lb = x0_ -1;
+    ub = x0_ +1;
     % Depending on the method chosen launch the assess function with a different esfit function
     if (nParameters_>0)
         switch FitOpts.MethodID
             case 1 % Nelder/Mead simplex
-                bestx0_ = esfit_simplex(@assess,x0_,FitOpts,funArgs{:});
+                bestx0_ = esfit_simplex(@(x) assess(x, funArgs{:}),x0_, lb, ub, FitOpts); % funArgs not updated
             case 2 % Levenberg/Marquardt
                 FitOpts.Gradient = FitOpts.TolFun;
-                bestx0_ = esfit_levmar(@residuals_,x0_,FitOpts,funArgs{:});
+                bestx0_ = esfit_levmar(@(x) residuals_(x, funArgs{:}),x0_,lb,ub,FitOpts); 
             case 3 % Monte Carlo
-                bestx0_ = esfit_montecarlo(@assess,nParameters_,FitOpts,funArgs{:});
+                bestx0_ = esfit_montecarlo(@(x) assess(x, funArgs{:}),x0_, lb, ub,FitOpts); 
             case 4 % Genetic
-                bestx0_ = esfit_genetic(@assess,nParameters_,FitOpts,funArgs{:});
+                bestx0_ = esfit_genetic(@(x) assess(x, funArgs{:}),nParameters_,FitOpts); 
             case 5 % Grid search
-                bestx0_ = esfit_grid(@assess,nParameters_,FitOpts,funArgs{:});
+                bestx0_ = esfit_grid(@(x) assess(x, funArgs{:}),x0_, lb, ub,FitOpts); 
             case 6 % Particle swarm
-                bestx0_ = esfit_swarm(@assess,nParameters_,FitOpts,funArgs{:});
+                bestx0_ = esfit_swarm(@(x) assess(x, funArgs{:}),x0_, lb, ub,FitOpts); 
             case 7 %Manual fit
                 assess(startx,funArgs{:});
                 bestx0_ = startx;
@@ -1348,7 +1352,7 @@ try
         SpectraExcluded = {};
         nargouts = length(strsplit(regexp(help('saffron'), '(?<=\()[^)]*(?=\))', 'match', 'once'),','));
         %Loop over all field positions (i.e. different files/spectra)
-        parfor (Index = 1:numSpec,FitData.CurrentCoreUsage)
+        parfor (Index = 1:numSpec,FitData.CurrentCoreUsage) % was parfor
             
             %Run saffron for a given field position
             if nargouts==3
@@ -1368,7 +1372,7 @@ try
             end
             td = Out.td;
             %Do base-correction as would be done in saffron
-            tdx = basecorr(td,[1 2],[0 0]);
+            tdx = basecorr(real(td),[],[0 0]);
             %If done for experimental data, then do Lorentz-Gauss transformation
             if FitData.SimOpt{Index}.Lorentz2GaussCheck
                 Processed.TimeAxis1 = t1;
@@ -1547,9 +1551,27 @@ return
 
 
 %===================================================================
-function resi = residuals_(x,ExpSpec,FitDat,FitOpt)
-[rms,resi] = assess(x,ExpSpec,FitDat,FitOpt);
+function varargout = residuals_(x,ExpSpec,FitDat,FitOpt)
+[rms,stopCode,simspec] = assess(x,ExpSpec,FitDat,FitOpt);
+out = {rms,stopCode,simspec};
+varargout = out(1:nargout);
 %===================================================================
+
+
+%===================================================================
+% Assess the current parameter set by simulating and getting rmsd
+%===================================================================
+function user_stop = assess_stop(input_struct)
+
+global UserCommand
+
+if UserCommand == 1
+    user_stop = 1;
+else
+    user_stop = 0;
+end
+return;
+
 
 %===================================================================
 % Assess the current parameter set by simulating and getting rmsd
@@ -1575,6 +1597,7 @@ Vary = FitDat.Vary;
 Exp = FitData.Exp;
 SimOpt = FitDat.SimOpt;
 rmsd_individual = cell(FitData.numSpec,1);
+stopCode = 0;
 
 %------------------------------------------------------------------------
 %Simulate spectra
@@ -1611,7 +1634,7 @@ nargouts = length(strsplit(regexp(help('saffron'), '(?<=\()[^)]*(?=\))', 'match'
 while SimulationNotSuccesful
     
     %Loop over all field positions (i.e. different files/spectra)
-    parfor (Index = 1:numSpec,FitData.CurrentCoreUsage)
+    parfor (Index = 1:numSpec,FitData.CurrentCoreUsage) % was parfor
         
         %Run saffron for a given field position
         if nargouts==3
@@ -1632,7 +1655,7 @@ while SimulationNotSuccesful
         end
         td = Out.td;
         %Do base-correction as would be done in saffron
-        tdx = basecorr(td,[1 2],[0 0]);
+        tdx = basecorr(real(td),[],[0 0]);
         %If done for experimental data, then do Lorentz-Gauss transformation
         if SimOpt{Index}.Lorentz2GaussCheck
             Processed.TimeAxis1 = t1;
@@ -1948,7 +1971,16 @@ if (UserCommand==2)
     disp('---------------------------------------------')
 end
 
-out = {rmsd,[],simspec};
+if (UserCommand==1)
+    str = bestfitlist(BestSys,Vary);
+    disp('--------------- user stop -------------------')
+    disp('-------- current fit parameters -------------')
+    fprintf(str);
+    disp('---------------------------------------------')
+    stopCode = 1;
+end
+
+out = {rmsd,stopCode,simspec};
 varargout = out(1:nargout);
 return
 %==========================================================================
