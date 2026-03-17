@@ -74,7 +74,7 @@ function output = uwb_eval( arg1, arg2 )
 
 % parse function
 if exist('arg1','var')
-    if isstr('arg1')
+    if isa(arg1, 'char')
         filename = arg1;
     elseif isstruct('arg1')
         options = arg1;
@@ -138,6 +138,8 @@ else
             warning(ErrorText);
             return
         end
+    else
+        Averages = 1; % e.g. data from dig_interface('get') is only 1 Avg
     end
 end
 
@@ -337,10 +339,11 @@ end
 n_traces = prod(parvar_pts) / prod(cellfun(@length,dta_x));
 
 if isfield(conf,'dig_max')
-    trace_maxlev = n_traces * estr.shots * conf.dig_max;
+    trace_maxlev = n_traces * estr.shots * Averages * conf.dig_max;
 else
-    trace_maxlev = n_traces * estr.shots * 2^11;
+    trace_maxlev = n_traces * estr.shots * Averages * 2^11;
 end
+trace_maxlev = double(trace_maxlev);
 
 
 %% get out all echoes
@@ -356,7 +359,12 @@ EchoMaxRange = (EchoPosition-Distance2Position+1:EchoPosition+Distance2Position)
 
 % get the downconversion LO
 FullTimeAxis = (0:(length(EchoMaxRange)-1)).'/fsmp;
-LO = exp(-2*pi*1i*FullTimeAxis*DetectionFrequency.');
+% check if data was recorded with undersampling or oversampling
+if DetectionFrequency > fsmp/2
+    LO = exp(-2*pi*1i*FullTimeAxis*DetectionFrequency.');
+else
+    LO = exp(-2*pi*1i*FullTimeAxis*(fsmp-DetectionFrequency).');
+end
 
 flipback = 0;
 % 1D or 2D?
@@ -612,6 +620,18 @@ elseif isfield(savedta,'dta_001')
             else
                 nAvgs = ii;
             end
+        end
+    end
+elseif any(contains(fieldnames(savedta), 'dta_'))
+    fields = fieldnames(savedta);  % Get all field names
+    dta_fields = fields(contains(fields, 'dta_'));
+    for ii = 1:length(dta_fields)
+        dta{ii} = double(eval(['savedta.' dta_fields{ii}]));
+        % only keep it if the average is complete, unless it is the first
+        if sum(dta{ii}(end-estr.events{estr.det_event}.det_len:end)) == 0 && ii > 1
+            dta = dta(1:end-1);
+        else
+            nAvgs = ii;
         end
     end
 else
