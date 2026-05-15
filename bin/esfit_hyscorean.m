@@ -1236,13 +1236,13 @@ try
                 FitOpts.Gradient = FitOpts.TolFun;
                 bestx0_ = esfit_levmar(@(x) residuals_(x, funArgs{:}),x0_,lb,ub,FitOpts); 
             case 3 % Monte Carlo
-                bestx0_ = esfit_montecarlo(@(x) assess(x, funArgs{:}), lb, ub,FitOpts);
+                bestx0_ = esfit_montecarlo(@(x) assess(x, funArgs{:}), lb, ub,FitOpts); 
             case 4 % Genetic
-                bestx0_ = esfit_genetic(@(x) assess(x, funArgs{:}),lb,ub,FitOpts);
+                bestx0_ = esfit_genetic(@(x) assess(x, funArgs{:}), lb, ub, FitOpts); 
             case 5 % Grid search
-                bestx0_ = esfit_grid(@(x) assess(x, funArgs{:}),lb,ub,FitOpts); 
+                bestx0_ = esfit_grid(@(x) assess(x, funArgs{:}), lb, ub,FitOpts); 
             case 6 % Particle swarm
-                bestx0_ = esfit_swarm(@(x) assess(x, funArgs{:}),lb,ub,FitOpts); 
+                bestx0_ = esfit_swarm(@(x) assess(x, funArgs{:}), lb, ub,FitOpts); 
             case 7 %Manual fit
                 assess(startx,funArgs{:});
                 bestx0_ = startx;
