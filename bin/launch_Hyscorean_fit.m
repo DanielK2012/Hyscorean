@@ -72,7 +72,8 @@ for Index = 1:numSpec
   %Fill known experimental parameters
   Exp{Index}.Sequence = 'HYSCORE';
   Exp{Index}.Field = DataForFitting.Field + DataForFitting.FieldOffset;
-  Exp{Index}.tau = DataForFitting.TauValues;
+  % Exp{Index}.tau = DataForFitting.TauValues;
+  Exp{Index}.tau = DataForFitting.currentTaus./1e3;
   Exp{Index}.dt = DataForFitting.TimeStep1;
   Exp{Index}.nPoints = DataForFitting.nPoints;
   %Check for compatibility with older versions
