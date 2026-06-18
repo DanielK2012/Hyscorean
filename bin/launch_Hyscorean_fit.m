@@ -73,7 +73,11 @@ for Index = 1:numSpec
   Exp{Index}.Sequence = 'HYSCORE';
   Exp{Index}.Field = DataForFitting.Field + DataForFitting.FieldOffset;
   % Exp{Index}.tau = DataForFitting.TauValues;
-  Exp{Index}.tau = DataForFitting.currentTaus./1e3;
+  Exp{Index}.tau = DataForFitting.currentTaus./1e3; % convert ns to microseconds for EasySpin
+  if length(Exp{Index}.tau) > 1
+      % Error message for tau vector
+      error('Only single tau values per spectrum are currently supported in HYSCORE simulations. Please save separate spectra for each tau value!');
+  end
   Exp{Index}.dt = DataForFitting.TimeStep1;
   Exp{Index}.nPoints = DataForFitting.nPoints;
   %Check for compatibility with older versions
